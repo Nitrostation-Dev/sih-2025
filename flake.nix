@@ -420,6 +420,7 @@ vim.diagnostic.config {
 		devShells.${system}.default = pkgs.mkShell {
 			nativeBuildInputs = [
 				pkgs.git
+				pkgs.black
 
 				(pkgs.python3.withPackages (python-pkgs: []))
 			];
