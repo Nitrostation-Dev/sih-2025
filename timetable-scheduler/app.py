@@ -3,15 +3,10 @@ import classes
 
 
 class AssignedClassData:
-    # def __init__(self, courseId: int, teacherId: int, clsId: int) -> None:
-    #     self.courseId = courseId
-    #     self.teacherId = teacherId
-    #     self.clsId = clsId
-    #
     def __init__(self, batchId: int) -> None:
         self.courseId = -1
         self.facultyId = -1
-        self.batchId = -1
+        self.batchId = batchId
 
     def assign_courseId(self, courseId: int) -> None:
         if self.courseId != -1:
@@ -21,30 +16,36 @@ class AssignedClassData:
 
         self.courseId = courseId
 
-    def assign_facultyId(self, facultyId: int) -> None:
+    def is_free_course(self) -> bool:
+        if self.courseId != -1:
+            return False
+
+        return True
+
+    def is_free_faculty(self) -> bool:
         if self.facultyId != -1:
-            raise ValueError(
-                f"Faculty Already assigned. Faculty Id to Assign: {facultyId}; but already assigned to {self.facultyId}"
-            )
+            return False
 
-        self.facultyId = facultyId
-
-    def assign_batchId(self, batchId: int) -> None:
-        if self.batchId != -1:
-            raise ValueError(
-                f"Batch Already assigned. Batch Id to Assign: {batchId}; but already assigned to {self.batchId}"
-            )
-
-        self.batchId = batchId
+        return True
 
 
 class Slot:
     def __init__(self, slot_no: int, batchIds: List[int]) -> None:
         self.slot_no = slot_no
 
-        self.assignedClasses: List[AssignedClassData] = [
-            AssignedClassData(id) for id in batchIds
-        ]
+        self.batchId_assignedClasses_map: Dict[int, AssignedClassData] = {}
+        for id in batchIds:
+            self.batchId_assignedClasses_map[id] = AssignedClassData(id)
+
+    def __str__(self) -> str:
+        string = ""
+        for batchId, data in self.batchId_assignedClasses_map.items():
+            string += f"\nBatchId: {batchId}; CourseId: {data.courseId}; FacultyId: {data.facultyId}"
+
+        return string
+
+    def is_free(self, batchId: int) -> bool:
+        return self.batchId_assignedClasses_map[batchId].is_free_course()
 
 
 class App:
@@ -53,26 +54,28 @@ class App:
         self.days_per_week = data["daysPerWeek"]
         self.no_of_free_slot_after_working_slot = data["noOfFreeSlotAfterWorkingSlot"]
 
+        self.batches: Dict[int, classes.Batch] = self.get_classes_from_data(data)
         self.courses: Dict[int, classes.Course] = self.get_courses_from_data(data)
         self.faculties: Dict[int, classes.Faculty] = self.get_teachers_from_data(data)
-        self.batches: Dict[int, classes.Batch] = self.get_classes_from_data(data)
 
         self.course_faculty_map = self.generate_course_teachers_map()
 
-        print(self.slots_per_day)
-        print(self.days_per_week)
-        print(self.no_of_free_slot_after_working_slot)
-
+        print("Slots Per Day: ", self.slots_per_day)
+        print("Days Per Week: ", self.days_per_week)
+        print("No Of Free Slot After Working Slot", self.no_of_free_slot_after_working_slot)
+        
+        print("\nCourses:")
         [print(key, ":", value, ";", end="") for key, value in self.courses.items()]
-        print()
+        print("\n\nFaculties")
         [print(key, ":", value, ";", end="") for key, value in self.faculties.items()]
-        print()
+        print("\n\nBatches")
         [print(key, ":", value, ";", end="") for key, value in self.batches.items()]
+        print()
         print()
 
         self.working_days: Dict[int, List[Slot]] = {}
         self.create_free_slots()
-        print(self.working_days)
+        self.print_slots_table()
 
     def create_free_slots(self) -> None:
         for dayNo in range(self.days_per_week):
@@ -83,7 +86,38 @@ class App:
             self.working_days[dayNo] = slots
 
     def generate_table(self) -> None:
-        pass
+        # 1. Pick a Batch to work with
+        # 2. Fill the Batch Slots with Courses
+        # 3. Pick Faculty for Each Course
+
+        def fill_single_slot_per_day(self, batchId: int, courseId: int, course: classes.Course):
+            for dayIndex, day in self.working_days.items():
+                for slotIndex, slot in enumerate(day):
+                    if not slot.is_free(batchId):
+                        continue
+
+                    if not course.request_slot(batchId):
+                        return
+                    
+                    slot.batchId_assignedClasses_map[batchId].assign_courseId(
+                        courseId
+                    )
+                    print("Assigned Course")
+                    break
+
+        for batchId in self.batches:
+            for courseId, course in self.courses.items():
+                print("Working With", courseId)
+                fill_single_slot_per_day(self, batchId, courseId, course)
+
+    # TODO
+    def print_slots_table(self) -> None:
+        for day_i, day in self.working_days.items():
+            for slot_no, slot in enumerate(day):
+                print("Day: ", day_i)
+                print("Slot No: ", slot_no)
+                print("Slot: \n", slot, sep="")
+                print()
 
     def get_course_id(self, name: str):
         for course in self.courses.values():
@@ -96,7 +130,10 @@ class App:
         courses = {}
         for i in data["courses"]:
             course_cls = classes.Course(
-                i, data["courses"][i]["name"], data["courses"][i]["slotsPerWeek"]
+                i,
+                data["courses"][i]["name"],
+                data["courses"][i]["slotsPerWeek"],
+                list(self.batches.keys()),
             )
             courses[i] = course_cls
 
@@ -164,3 +201,6 @@ if __name__ == "__main__":
     }
 
     app = App(data)
+    app.generate_table()
+    print("=============================================================")
+    app.print_slots_table()
