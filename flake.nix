@@ -422,12 +422,16 @@ vim.diagnostic.config {
 				pkgs.git
 				pkgs.black
 
-				(pkgs.python3.withPackages (python-pkgs: []))
+				(pkgs.python3.withPackages (python-pkgs: [
+					python-pkgs.tabulate
+				]))
 			];
 
 			buildInputs = [
 				self.packages.${system}.nixvim
-				(pkgs.python3.withPackages (python-pkgs: []))
+				(pkgs.python3.withPackages (python-pkgs: [
+					python-pkgs.tabulate
+				]))
 			];
 		};
 	};
