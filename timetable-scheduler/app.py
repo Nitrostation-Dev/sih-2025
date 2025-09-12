@@ -1,7 +1,5 @@
 from typing import Dict, List
 from tabulate import tabulate
-import classes
-
 
 class AssignedClassData:
     def __init__(self, batchId: int) -> None:
@@ -171,25 +169,50 @@ class App:
                             )
                         else:
                             if check_slot.get_data(batchId).is_faculty_free():
-                                facultyIdToAssign = self.course_faculty_map[check_slot.get_data(batchId).courseId][0]
-                                if slot.is_faculty_free(facultyIdToAssign):
-                                    check_slot.get_data(batchId).assign_facultyId(facultyIdToAssign)
-                                    self.exchange_slots(batchId, dayNo, slotNo, dayNo, check_slotNo)
+                                facultyIdToAssign = self.course_faculty_map[
+                                    check_slot.get_data(batchId).courseId
+                                ][0]
+                                if slot.is_faculty_free(
+                                    facultyIdToAssign
+                                ) and check_slot.is_faculty_free(facultyId):
+                                    check_slot.get_data(batchId).assign_facultyId(
+                                        facultyIdToAssign
+                                    )
+                                    self.exchange_slots(
+                                        batchId, dayNo, slotNo, dayNo, check_slotNo
+                                    )
 
-                            elif check_slot.is_faculty_free(facultyId) and slot.is_faculty_free(check_slot.get_data(batchId).facultyId):
-                                self.exchange_slots(batchId, dayNo, slotNo, dayNo, check_slotNo)
+                            elif check_slot.is_faculty_free(
+                                facultyId
+                            ) and slot.is_faculty_free(
+                                check_slot.get_data(batchId).facultyId
+                            ):
+                                self.exchange_slots(
+                                    batchId, dayNo, slotNo, dayNo, check_slotNo
+                                )
 
         # Fill Batch Slots with Courses
-        for batchId in self.batches:
-            for courseId, course in self.courses.items():
-                # print("Working With", courseId)
-                fill_single_slot_per_day(self, batchId, courseId, course)
+        while not self.is_all_courses_filled():
+            for batchId in self.batches:
+                for courseId, course in self.courses.items():
+                    fill_single_slot_per_day(self, batchId, courseId, course)
 
-        # Assign Faculty
-        for batchId in self.batches:
-            if batchId == 1:
-                pass
-            assign_faculty(self, batchId)
+        # # Assign Faculty
+        # for batchId in self.batches:
+        #     assign_faculty(self, batchId)
+        #
+        # for id in self.batches:
+        #     while self.is_all_faculty_assigned(id):
+        #         for batchId in self.batches:
+        #             assign_faculty(self, batchId)
+
+    def is_all_courses_filled(self) -> bool:
+        for course in self.courses.values():
+            for batchId in self.batches:
+                if course.batchIds_slotsTrack_map[batchId]["slotsNeeded"] != 0:
+                    return False
+
+        return True
 
     def is_all_faculty_assigned(self, batchId: int) -> bool:
         for day in self.working_days.values():
@@ -286,13 +309,13 @@ class App:
 
 if __name__ == "__main__":
     data = {
-        "slotsPerDay": 3,
+        "slotsPerDay": 8,
         "daysPerWeek": 5,
         "noOfFreeSlotAfterWorkingSlot": 1,
         "courses": {
             0: {
                 "name": "23MAT",
-                "slotsPerWeek": 5,
+                "slotsPerWeek": 8,
             },
             1: {
                 "name": "23MEE",
@@ -300,12 +323,14 @@ if __name__ == "__main__":
             },
             2: {
                 "name": "23CHY",
-                "slotsPerWeek": 1,
+                "slotsPerWeek": 4,
             },
         },
         "batches": [
             "ELC-A",
             "ELC-B",
+            "ELC-C",
+            "ELC-D",
         ],
         "faculties": {
             0: {
