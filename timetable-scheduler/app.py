@@ -147,21 +147,13 @@ class App:
                     # print("Assigned Course")
                     break
 
-        # Fill Batch Slots with Courses
-        for batchId in self.batches:
-            for courseId, course in self.courses.items():
-                # print("Working With", courseId)
-                fill_single_slot_per_day(self, batchId, courseId, course)
-
-        # Assign Faculty
-        for batchId in self.batches:
+        def assign_faculty(self: App, batchId: int):
             for dayNo, day in self.working_days.items():
                 for slotNo, slot in enumerate(day):
                     if slot.is_free(batchId):
                         continue
 
                     data = slot.get_data(batchId)
-
                     facultyId = self.course_faculty_map[data.courseId][0]
                     # Since We are working with contraint that only one faculty per course
 
@@ -177,11 +169,35 @@ class App:
                             self.exchange_slots(
                                 batchId, dayNo, slotNo, dayNo, check_slotNo
                             )
-                            break
-                    else:
-                        continue
+                        else:
+                            if check_slot.get_data(batchId).is_faculty_free():
+                                facultyIdToAssign = self.course_faculty_map[check_slot.get_data(batchId).courseId][0]
+                                if slot.is_faculty_free(facultyIdToAssign):
+                                    check_slot.get_data(batchId).assign_facultyId(facultyIdToAssign)
+                                    self.exchange_slots(batchId, dayNo, slotNo, dayNo, check_slotNo)
 
-                    # raise Exception("Couldn't Assign Faculty / Sort the Slots for a Viable Solution")
+                            elif check_slot.is_faculty_free(facultyId) and slot.is_faculty_free(check_slot.get_data(batchId).facultyId):
+                                self.exchange_slots(batchId, dayNo, slotNo, dayNo, check_slotNo)
+
+        # Fill Batch Slots with Courses
+        for batchId in self.batches:
+            for courseId, course in self.courses.items():
+                # print("Working With", courseId)
+                fill_single_slot_per_day(self, batchId, courseId, course)
+
+        # Assign Faculty
+        for batchId in self.batches:
+            if batchId == 1:
+                pass
+            assign_faculty(self, batchId)
+
+    def is_all_faculty_assigned(self, batchId: int) -> bool:
+        for day in self.working_days.values():
+            for slot in day:
+                if slot.get_data(batchId).is_faculty_free():
+                    return False
+
+        return True
 
     # TODO
     def print_slots_table(self) -> None:
@@ -270,7 +286,7 @@ class App:
 
 if __name__ == "__main__":
     data = {
-        "slotsPerDay": 2,
+        "slotsPerDay": 3,
         "daysPerWeek": 5,
         "noOfFreeSlotAfterWorkingSlot": 1,
         "courses": {
@@ -281,6 +297,10 @@ if __name__ == "__main__":
             1: {
                 "name": "23MEE",
                 "slotsPerWeek": 3,
+            },
+            2: {
+                "name": "23CHY",
+                "slotsPerWeek": 1,
             },
         },
         "batches": [
@@ -295,6 +315,10 @@ if __name__ == "__main__":
             1: {
                 "name": "TeacherName2",
                 "course": "23MEE",
+            },
+            2: {
+                "name": "TeacherName3",
+                "course": "23CHY",
             },
         },
     }
