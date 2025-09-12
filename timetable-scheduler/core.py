@@ -2,19 +2,26 @@ from typing import Dict, List
 
 
 class Course:
-    def __init__(self, id: int, name: str, slots_per_week: int, batchIds: List[int]) -> None:
+    def __init__(
+        self, id: int, name: str, slots_per_week: int, batchIds: List[int]
+    ) -> None:
         self.id = id
         self.name = name
         self.slots_per_week = slots_per_week
 
-        # self.batchIds_slotsTrack_map: Dict[int, Dict[str, int]] = {
-        #     0: { "slotsRequiredPerWeek": 5, "slotsUsed": 0 }
-        # }
         self.batchIds_slotsTrack_map: Dict[int, Dict[str, int]] = {}
         for id in batchIds:
-            self.batchIds_slotsTrack_map[id] = { "slotsUsed": 0, "slotsRequired": slots_per_week }
+            self.batchIds_slotsTrack_map[id] = {
+                "slotsNeeded": slots_per_week,
+                "slotsRequired": slots_per_week,
+            }
 
-        print("Created Course: ", name, " ; with slots tracker: ", self.batchIds_slotsTrack_map)
+        print(
+            "Created Course: ",
+            name,
+            " ; with slots tracker: ",
+            self.batchIds_slotsTrack_map,
+        )
 
     def __str__(self) -> str:
         return f"Course ( id = {self.id}; name = {self.name}; slots_per_week = {self.slots_per_week}; )"
@@ -23,10 +30,10 @@ class Course:
         if batchId not in self.batchIds_slotsTrack_map.keys():
             raise IndexError("Batch Id Not Found")
 
-        if self.batchIds_slotsTrack_map[batchId]["slotsUsed"] >= self.batchIds_slotsTrack_map[batchId]["slotsRequired"]:
+        if self.batchIds_slotsTrack_map[batchId]["slotsNeeded"] == 0:
             return False
-        
-        self.batchIds_slotsTrack_map[batchId]["slotsUsed"] += 1
+
+        self.batchIds_slotsTrack_map[batchId]["slotsNeeded"] -= 1
         return True
 
 
