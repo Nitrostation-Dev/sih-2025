@@ -5,5 +5,5 @@ Problem statement: "Timetable Scheduler" for **Smart India Hackathon - 2025**
 - Pranavanath Ryali
 - Nandhika
 - Shreeya
-- Sriwathsan
+- Srivathsan
 - Mithun
