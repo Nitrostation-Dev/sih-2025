@@ -20,22 +20,6 @@ class Scheduler:
             self.generate_faculty_by_course_map()
         )
 
-        # print("Slots Per Day: ", self.slots_per_day)
-        # print("Days Per Week: ", self.days_per_week)
-        # print(
-        #     "No Of Free Slot After Working Slot",
-        #     self.no_of_free_slot_after_working_slot,
-        # )
-
-        # print("\nCourses:")
-        # [print(key, ":", value, ";", end="") for key, value in self.courses_by_id_map.items()]
-        # print("\n\nFaculties")
-        # [print(key, ":", value, ";", end="") for key, value in self.faculties_by_id_map.items()]
-        # print("\n\nBatches")
-        # [print(key, ":", value, ";", end="") for key, value in self.batches_by_id_map.items()]
-        # print()
-        # print()
-
         self.working_days: List[List[Slot]] = self.create_slots()
 
     def create_slots(self) -> List[List[Slot]]:
@@ -73,156 +57,40 @@ class Scheduler:
         y_slot_data.assign_course_faculty(_course_id, _faculty_id, force_assign=True)
 
     def generate_table(self) -> None:
-        # 1. Pick a Batch to work with
-        # 2. Fill the Batch Slots with Courses
-        # 3. Pick Faculty for Each Course
-        def assign_courses_per_day(
-            self: Scheduler, batch_id: int, course_id: int
-        ) -> None:
-            for dayIndex, day in enumerate(self.working_days):
-                for slotIndex, slot in enumerate(day):
-                    if not slot.is_free_slot(batch_id):
-                        continue
-
-                    if not course.request_slot(batch_id):
-                        return
-
-                    slot.get_batch_slot_data(batch_id).assign_course(course_id)
-                    break
-
-        def assign_faculty(self: Scheduler) -> None:
-            for batch_id in self.batches_by_id_map.keys():
-                for day_index, day in enumerate(self.working_days):
-                    for slot_index, slot in enumerate(day):
-                        if slot.is_free_slot(batch_id):
+        is_first_batch = True
+        for batch_id in self.batches_by_id_map.keys():
+            for course in self.courses_by_id_map.values():
+                for day in self.working_days:
+                    for slot in day:
+                        # Assign Courses for first batch
+                        if not slot.is_free_slot(batch_id):
                             continue
 
-                        batch_data = slot.get_batch_slot_data(batch_id)
-                        faculty_id = self.faculty_ids_by_course_id_map[
-                            batch_data.course_id
-                        ][0]
+                        if is_first_batch:
+                            if not course.request_slot(batch_id):
+                                continue
 
-                        if slot.is_faculty_booked(faculty_id):
-                            continue
+                            faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
 
-                        batch_data.assign_faculty(faculty_id)
+                            batch_data = slot.get_batch_slot_data(batch_id)
+                            batch_data.assign_course_faculty(course.id, faculty_id)
 
-        def find_and_exchange_double_booked_slot_per_day(self: Scheduler) -> None:
-            for day_index, day in enumerate(self.working_days):
-                for slot_index, slot in enumerate(day):
-                    for batch_id in self.batches_by_id_map.keys():
-                        if self.are_faculties_assigned_to_courses(batch_id):
-                            continue
+                            break
+                        else:
+                            faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
 
-                        batch_data = slot.get_batch_slot_data(batch_id)
+                            if slot.is_faculty_booked(faculty_id):
+                                continue
 
-                        if not slot.is_free_slot(
-                            batch_id
-                        ) and not batch_data.is_faculty_assigned():
-                            # First Find if any free Slots available to exchange with
-                            for check_slot_index, check_slot in enumerate(day):
-                                if check_slot_index == slot_index:
-                                    continue
+                            if not course.request_slot(batch_id):
+                                continue
 
-                                if not check_slot.is_free_slot(batch_id):
-                                    continue
-                                
-                                print("BOIII", batch_id, day_index, slot_index, check_slot_index)
-                                self.exchange_slots(
-                                    batch_id,
-                                    day_index,
-                                    slot_index,
-                                    day_index,
-                                    check_slot_index,
-                                )
-                                return
+                            batch_data = slot.get_batch_slot_data(batch_id)
+                            batch_data.assign_course_faculty(course.id, faculty_id)
 
-                            # Now Check for any suitable slots that are already assigned to exchange with
-                            for check_slot_index, check_slot in enumerate(day):
-                                if check_slot_index == slot_index:
-                                    continue
+                            break
 
-                                if check_slot.is_free_slot(batch_id):
-                                    continue
-
-                                # TODO:
-                                
-                                # print("BOIII", batch_id, day_index, slot_index, check_slot_index)
-                                # self.exchange_slots(
-                                #     batch_id,
-                                #     day_index,
-                                #     slot_index,
-                                #     day_index,
-                                #     check_slot_index,
-                                # )
-                                # return
-
-
-        # def assign_faculty(self: App, batchId: int):
-        #     for dayNo, day in self.working_days.items():
-        #         for slotNo, slot in enumerate(day):
-        #             if slot.is_free(batchId):
-        #                 continue
-        #
-        #             data = slot.get_data(batchId)
-        #             facultyId = self.faculty_ids_by_course_id_map[data.courseId][0]
-        #             # Since We are working with contraint that only one faculty per course
-        #
-        #             if slot.is_faculty_free(facultyId):
-        #                 data.assign_facultyId(facultyId)
-        #                 continue
-        #
-        #             for check_slotNo, check_slot in enumerate(day):
-        #                 if check_slotNo == slotNo:
-        #                     continue
-        #
-        #                 if check_slot.is_free(batchId):
-        #                     self.exchange_slots(
-        #                         batchId, dayNo, slotNo, dayNo, check_slotNo
-        #                     )
-        #                 else:
-        #                     if check_slot.get_data(batchId).is_faculty_free():
-        #                         facultyIdToAssign = self.faculty_ids_by_course_id_map[
-        #                             check_slot.get_data(batchId).courseId
-        #                         ][0]
-        #                         if slot.is_faculty_free(
-        #                             facultyIdToAssign
-        #                         ) and check_slot.is_faculty_free(facultyId):
-        #                             check_slot.get_data(batchId).assign_facultyId(
-        #                                 facultyIdToAssign
-        #                             )
-        #                             self.exchange_slots(
-        #                                 batchId, dayNo, slotNo, dayNo, check_slotNo
-        #                             )
-        #
-        #                     elif check_slot.is_faculty_free(
-        #                         facultyId
-        #                     ) and slot.is_faculty_free(
-        #                         check_slot.get_data(batchId).facultyId
-        #                     ):
-        #                         self.exchange_slots(
-        #                             batchId, dayNo, slotNo, dayNo, check_slotNo
-        #                         )
-
-        # Fill Batch Slots with Courses
-        for batchId in self.batches_by_id_map:
-            for courseId, course in self.courses_by_id_map.items():
-                assign_courses_per_day(self, batchId, courseId)
-
-        assign_faculty(self)
-        counter = 5
-        while not self.are_faculties_assigned_to_courses() and counter != 0:
-            find_and_exchange_double_booked_slot_per_day(self)
-            assign_faculty(self)
-
-        # # Assign Faculty
-        # for batchId in self.batches:
-        #     assign_faculty(self, batchId)
-        #
-        # for id in self.batches:
-        #     while self.is_all_faculty_assigned(id):
-        #         for batchId in self.batches:
-        #             assign_faculty(self, batchId)
+            is_first_batch = False
 
     def are_all_courses_assigned(self) -> bool:
         for course in self.courses_by_id_map.values():
@@ -239,8 +107,11 @@ class Scheduler:
                     for batch_id in self.batches_by_id_map.keys():
                         if not slot.get_batch_slot_data(batch_id).is_faculty_assigned():
                             return False
-                
-                if not slot.get_batch_slot_data(batch_id).is_faculty_assigned() and slot.get_batch_slot_data(batch_id).is_course_assigned():
+
+                if (
+                    not slot.get_batch_slot_data(batch_id).is_faculty_assigned()
+                    and slot.get_batch_slot_data(batch_id).is_course_assigned()
+                ):
                     return False
 
         return True
@@ -252,39 +123,6 @@ class Scheduler:
             self.courses_by_id_map,
             self.faculties_by_id_map,
         )
-
-    # TODO
-    # def print_slots_table(self) -> None:
-    #     for batchId in self.batches_by_id_map:
-    #         batch_table = []
-    #         for dayNo, day in self.working_days.items():
-    #             day_slots = []
-    #             for slotNo, slot in enumerate(day):
-    #                 if slot.is_free(batchId):
-    #                     day_slots.append("-")
-    #                     continue
-    #
-    #                 text = ""
-    #                 text += f"Course: {self.courses_by_id_map[slot.get_data(batchId).courseId].name}"
-    #
-    #                 if slot.get_data(batchId).facultyId == -1:
-    #                     day_slots.append(text)
-    #                     continue
-    #
-    #                 text += f"    Faculty: {self.faculties_by_id_map[slot.get_data(batchId).facultyId].name}"
-    #                 day_slots.append(text)
-    #
-    #             batch_table.append(day_slots)
-    #
-    #         print("For Batch: ", self.batches_by_id_map[batchId].name)
-    #         print(
-    #             tabulate(
-    #                 batch_table,
-    #                 headers=[str(i + 1) for i in range(self.slots_per_day)],
-    #                 tablefmt="github",
-    #             )
-    #         )
-    #         print()
 
     def get_course_id(self, course_name: str) -> int:
         for course in self.courses_by_id_map.values():
