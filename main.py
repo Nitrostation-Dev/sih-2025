@@ -9,7 +9,7 @@ data = {
     "courses": {
         0: {
             "name": "23MAT",
-            "slotsPerWeek": 5,
+            "slotsPerWeek": 8,
         },
         1: {
             "name": "23MEE",
@@ -24,16 +24,12 @@ data = {
             "slotsPerWeek": 4,
         },
     },
-    # "batches": [
-    #     "ELC-A",
-    #     "ELC-B",
-    #     "ELC-C",
-    # ],
     "batches": {
         0: {"name": "ELC-A", "courses": ["23MAT", "23MEE", "23CHY"]},
         1: {"name": "ELC-B", "courses": ["23MAT", "23MEE"]},
-        2: {"name": "ELC-C", "courses": ["23MAT", "23MEE", "23MAT"]},
-        3: {"name": "ELC-D", "courses": ["23MAT", "23MEE", "23MAT", "23ABC"]},
+        2: {"name": "ELC-C", "courses": ["23MAT", "23MEE"]},
+        3: {"name": "ELC-D", "courses": ["23MAT"]},
+        4: {"name": "ELC-E", "courses": ["23MAT", "23MEE", "23ABC"]},
     },
     "faculties": {
         0: {

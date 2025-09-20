@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List
 
 from timetable_scheduler.utils import print_tables
@@ -61,35 +62,57 @@ class Scheduler:
         for batch_id, batch in self.batches_by_id_map.items():
             for course_id in batch.course_ids:
                 course = self.courses_by_id_map[course_id]
-                for day in self.working_days:
-                    for slot in day:
-                        # Assign Courses for first batch
-                        if not slot.is_free_slot(batch_id):
-                            continue
-
+                should_loop = True
+                loop_counter = 0
+                while should_loop:
+                    for day in self.working_days:
                         if is_first_batch:
-                            if not course.request_slot(batch_id):
-                                continue
+                            empty_slot_nos = []
+                            for i, slot in enumerate(day):
+                                if not slot.is_free_slot(batch_id):
+                                    continue
 
-                            faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
+                                empty_slot_nos.append(i)
+                            
+                            random.shuffle(empty_slot_nos)
+                            for slot_no in empty_slot_nos:
+                                slot = day[slot_no]
+                                if not course.request_slot(batch_id):
+                                    continue
 
-                            batch_data = slot.get_batch_slot_data(batch_id)
-                            batch_data.assign_course_faculty(course.id, faculty_id)
+                                faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
 
-                            break
+                                batch_data = slot.get_batch_slot_data(batch_id)
+                                batch_data.assign_course_faculty(course.id, faculty_id)
+
+                                break
                         else:
-                            faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
+                            for slot in day:
+                                faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
 
-                            if slot.is_faculty_booked(faculty_id):
-                                continue
+                                if not slot.is_free_slot(batch_id):
+                                    continue
 
-                            if not course.request_slot(batch_id):
-                                continue
+                                if slot.is_faculty_booked(faculty_id):
+                                    continue
 
-                            batch_data = slot.get_batch_slot_data(batch_id)
-                            batch_data.assign_course_faculty(course.id, faculty_id)
+                                if not course.request_slot(batch_id):
+                                    continue
 
-                            break
+                                batch_data = slot.get_batch_slot_data(batch_id)
+                                batch_data.assign_course_faculty(course.id, faculty_id)
+
+                                break
+
+                    should_loop = False
+
+                    if course.assigned_slot_countdown_by_batch_ids[batch_id] != 0:
+                        should_loop = True
+
+                    loop_counter += 1
+                    if loop_counter >= 50:
+                        self.print_tables()
+                        raise Exception("Couldn't determine timetable")
 
             is_first_batch = False
 
