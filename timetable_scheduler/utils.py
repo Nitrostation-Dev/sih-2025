@@ -1,3 +1,5 @@
+import json
+
 from typing import Dict, List
 from tabulate import tabulate
 
@@ -8,7 +10,6 @@ days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
 def print_tables(
     working_days: List[List[Slot]],
-
     batch_by_ids_map: Dict[int, Batch],
     course_by_id_map: Dict[int, Course],
     faculty_by_id_map: Dict[int, Faculty],
@@ -26,7 +27,9 @@ def print_tables(
 
                 text = f"Course: {course_by_id_map[batch_data.course_id].name}"
                 if batch_data.is_faculty_assigned():
-                    text += f"; Faculty: {faculty_by_id_map[batch_data.faculty_id].name}"
+                    text += (
+                        f"; Faculty: {faculty_by_id_map[batch_data.faculty_id].name}"
+                    )
 
                 day_slots.append(text)
 
@@ -40,3 +43,11 @@ def print_tables(
                 tablefmt="github",
             )
         )
+
+
+def parse_json(path: str) -> Dict:
+    file = open(path, "r")
+    data = json.load(file)
+    file.close()
+
+    return data
