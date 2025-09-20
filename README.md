@@ -2,7 +2,7 @@ Problem statement: "Timetable Scheduler" for **Smart India Hackathon - 2025**
 
 # ToDo
 - [ ] Multiple faculties per course
-- [ ] Parse data from a json file
+- [X] Parse data from a json file
 - [X] Batches having different courses
 - [ ] Breaks for faculty
 - [ ] Prefer certain courses early in morning
