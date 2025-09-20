@@ -19,24 +19,16 @@ data = {
             "name": "23CHY",
             "slotsPerWeek": 5,
         },
-        # 3: {
-        #     "name": "23CHYA",
-        #     "slotsPerWeek": 1,
-        # },
-        # 4: {
-        #     "name": "23CHYB",
-        #     "slotsPerWeek": 3,
-        # },
-        # 5: {
-        #     "name": "23CHYC",
-        #     "slotsPerWeek": 2,
-        # },
     },
-    "batches": [
-        "ELC-A",
-        "ELC-B",
-        "ELC-C",
-    ],
+    # "batches": [
+    #     "ELC-A",
+    #     "ELC-B",
+    #     "ELC-C",
+    # ],
+    "batches": {
+        0: {"name": "ELC-A", "courses": ["23MAT", "23MEE", "23CHY"]},
+        1: {"name": "ELC-B", "courses": ["23MAT", "23MEE"]},
+    },
     "faculties": {
         0: {
             "name": "TeacherName1",
@@ -50,18 +42,6 @@ data = {
             "name": "teachername3",
             "course": "23CHY",
         },
-        # 3: {
-        #     "name": "teaiasoeitnarst",
-        #     "course": "23CHYA",
-        # },
-        # 4: {
-        #     "name": "teachernamiarsnoten3",
-        #     "course": "23CHYB",
-        # },
-        # 5: {
-        #     "name": "teachermgtmg3",
-        #     "course": "23CHYC",
-        # },
     },
 }
 
