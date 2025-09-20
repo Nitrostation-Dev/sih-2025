@@ -157,11 +157,11 @@ class Scheduler:
 
     def create_courses_from_data(self, data: Dict) -> Dict[int, Course]:
         courses = {}
-        for i in data["courses"]:
+        for i, course in enumerate(data["courses"]):
             course_cls = Course(
                 i,
-                data["courses"][i]["name"],
-                data["courses"][i]["slotsPerWeek"],
+                course["name"],
+                course["slotsPerWeek"],
             )
             courses[i] = course_cls
 
@@ -169,11 +169,11 @@ class Scheduler:
 
     def create_faculties_from_data(self, data: Dict) -> Dict[int, Faculty]:
         teachers = {}
-        for i in data["faculties"]:
+        for i, faculty in enumerate(data["faculties"]):
             teacher_cls = Faculty(
                 i,
-                data["faculties"][i]["name"],
-                self.get_course_id(data["faculties"][i]["course"]),
+                faculty["name"],
+                self.get_course_id(faculty["course"]),
             )
             teachers[i] = teacher_cls
 
@@ -181,12 +181,12 @@ class Scheduler:
 
     def create_batches_from_data(self, data: Dict) -> Dict[int, Batch]:
         batches = {}
-        for i in data["batches"]:
+        for i, batch in enumerate(data["batches"]):
             course_ids = []
-            for course in data["batches"][i]["courses"]:
+            for course in batch["courses"]:
                 course_ids.append(self.get_course_id(course))
 
-            batch = Batch(i, data["batches"][i]["name"], course_ids)
+            batch = Batch(i, batch["name"], course_ids)
             batches[i] = batch
 
         return batches
