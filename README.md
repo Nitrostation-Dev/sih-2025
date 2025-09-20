@@ -6,7 +6,7 @@ Problem statement: "Timetable Scheduler" for **Smart India Hackathon - 2025**
 - [X] Batches having different courses
 - [ ] Breaks for faculty
 - [ ] Prefer certain courses early in morning
-- [ ] Randomize courses for first assigned batch
+- [X] Randomize courses for first assigned batch
 
 # Members & Their Roles
 - Jwala Surya Pratap
