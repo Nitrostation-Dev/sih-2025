@@ -3,22 +3,21 @@ from typing import Dict, List
 
 class Course:
     def __init__(
-        self, id: int, name: str, slots_per_week: int, batch_ids: List[int]
+        self, id: int, name: str, slots_per_week: int
     ) -> None:
         self.id = id
         self.name = name
         self.slots_per_week = slots_per_week
 
         self.assigned_slot_countdown_by_batch_ids: Dict[int, int] = {}
-        for id in batch_ids:
-            self.assigned_slot_countdown_by_batch_ids[id] = self.slots_per_week
 
     def __str__(self) -> str:
         return f"Course( id = {self.id}; name = {self.name}; slots_per_week = {self.slots_per_week}; )"
 
     def request_slot(self, batch_id: int) -> bool:
         if batch_id not in self.assigned_slot_countdown_by_batch_ids.keys():
-            raise IndexError("Batch Id Not Found")
+            self.assigned_slot_countdown_by_batch_ids[batch_id] = self.slots_per_week - 1
+            return True
 
         if self.assigned_slot_countdown_by_batch_ids[batch_id] == 0:
             return False
@@ -38,9 +37,10 @@ class Faculty:
 
 
 class Batch:
-    def __init__(self, id: int, name: str) -> None:
+    def __init__(self, id: int, name: str, course_ids: List[int]) -> None:
         self.id = id
         self.name = name
+        self.course_ids = course_ids
 
     def __str__(self) -> str:
         return f"Batch( id = {self.id}; name = {self.name}; )"

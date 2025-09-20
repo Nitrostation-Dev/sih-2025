@@ -10,8 +10,8 @@ class Scheduler:
         self.slots_per_day = data["slotsPerDay"]
         self.no_of_free_slot_after_working_slot = data["noOfFreeSlotAfterWorkingSlot"]
 
-        self.batches_by_id_map: Dict[int, Batch] = self.create_batches_from_data(data)
         self.courses_by_id_map: Dict[int, Course] = self.create_courses_from_data(data)
+        self.batches_by_id_map: Dict[int, Batch] = self.create_batches_from_data(data)
         self.faculties_by_id_map: Dict[int, Faculty] = self.create_faculties_from_data(
             data
         )
@@ -58,8 +58,9 @@ class Scheduler:
 
     def generate_table(self) -> None:
         is_first_batch = True
-        for batch_id in self.batches_by_id_map.keys():
-            for course in self.courses_by_id_map.values():
+        for batch_id, batch in self.batches_by_id_map.items():
+            for course_id in batch.course_ids:
+                course = self.courses_by_id_map[course_id]
                 for day in self.working_days:
                     for slot in day:
                         # Assign Courses for first batch
@@ -138,7 +139,6 @@ class Scheduler:
                 i,
                 data["courses"][i]["name"],
                 data["courses"][i]["slotsPerWeek"],
-                list(self.batches_by_id_map.keys()),
             )
             courses[i] = course_cls
 
@@ -158,8 +158,12 @@ class Scheduler:
 
     def create_batches_from_data(self, data: Dict) -> Dict[int, Batch]:
         batches = {}
-        for i, name in enumerate(data["batches"]):
-            batch = Batch(i, name)
+        for i in data["batches"]:
+            course_ids = []
+            for course in data["batches"][i]["courses"]:
+                course_ids.append(self.get_course_id(course))
+
+            batch = Batch(i, data["batches"][i]["name"], course_ids)
             batches[i] = batch
 
         return batches
