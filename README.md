@@ -5,6 +5,8 @@ Problem statement: "Timetable Scheduler" for **Smart India Hackathon - 2025**
 - [ ] Parse data from a json file
 - [X] Batches having different courses
 - [ ] Breaks for faculty
+- [ ] Prefer certain courses early in morning
+- [ ] Randomize courses for first assigned batch
 
 # Members & Their Roles
 - Jwala Surya Pratap
