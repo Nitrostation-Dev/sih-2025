@@ -66,7 +66,7 @@ class Scheduler:
                 loop_counter = 0
                 while should_loop:
                     for day in self.working_days:
-                        if is_first_batch:
+                        # if is_first_batch:
                             empty_slot_nos = []
                             for i, slot in enumerate(day):
                                 if not slot.is_free_slot(batch_id):
@@ -82,27 +82,30 @@ class Scheduler:
 
                                 faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
 
-                                batch_data = slot.get_batch_slot_data(batch_id)
-                                batch_data.assign_course_faculty(course.id, faculty_id)
-
-                                break
-                        else:
-                            for slot in day:
-                                faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
-
-                                if not slot.is_free_slot(batch_id):
-                                    continue
-
                                 if slot.is_faculty_booked(faculty_id):
                                     continue
 
-                                if not course.request_slot(batch_id):
-                                    continue
-
                                 batch_data = slot.get_batch_slot_data(batch_id)
                                 batch_data.assign_course_faculty(course.id, faculty_id)
 
                                 break
+                        # else:
+                        #     for slot in day:
+                        #         faculty_id = self.faculty_ids_by_course_id_map[course.id][0]
+                        #
+                        #         if not slot.is_free_slot(batch_id):
+                        #             continue
+                        #
+                        #         if slot.is_faculty_booked(faculty_id):
+                        #             continue
+                        #
+                        #         if not course.request_slot(batch_id):
+                        #             continue
+                        #
+                        #         batch_data = slot.get_batch_slot_data(batch_id)
+                        #         batch_data.assign_course_faculty(course.id, faculty_id)
+                        #
+                        #         break
 
                     should_loop = False
 
@@ -118,24 +121,11 @@ class Scheduler:
 
     def are_all_courses_assigned(self) -> bool:
         for course in self.courses_by_id_map.values():
-            for batchId in self.batches_by_id_map:
-                if course.assigned_slot_countdown_by_batch_ids[batchId] != 0:
-                    return False
+            for batch_id in self.batches_by_id_map.keys():
+                if batch_id not in course.assigned_slot_countdown_by_batch_ids.keys():
+                    continue
 
-        return True
-
-    def are_faculties_assigned_to_courses(self, batch_id=-1) -> bool:
-        for day in self.working_days:
-            for slot in day:
-                if batch_id == -1:
-                    for batch_id in self.batches_by_id_map.keys():
-                        if not slot.get_batch_slot_data(batch_id).is_faculty_assigned():
-                            return False
-
-                if (
-                    not slot.get_batch_slot_data(batch_id).is_faculty_assigned()
-                    and slot.get_batch_slot_data(batch_id).is_course_assigned()
-                ):
+                if course.assigned_slot_countdown_by_batch_ids[batch_id] != 0:
                     return False
 
         return True

@@ -424,6 +424,7 @@ vim.diagnostic.config {
 
 				(pkgs.python3.withPackages (python-pkgs: [
 					python-pkgs.tabulate
+					python-pkgs.ortools
 				]))
 			];
 
@@ -431,6 +432,7 @@ vim.diagnostic.config {
 				self.packages.${system}.nixvim
 				(pkgs.python3.withPackages (python-pkgs: [
 					python-pkgs.tabulate
+					python-pkgs.ortools
 				]))
 			];
 		};
