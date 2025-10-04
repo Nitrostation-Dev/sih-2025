@@ -5,55 +5,23 @@
 	"courses": [
 		{
 			"name": "23MAT",
-			"slotsPerWeek": 8
-		},
-		{
-			"name": "23MEE",
-			"slotsPerWeek": 3
-		},
-		{
-			"name": "23CHY",
-			"slotsPerWeek": 5
-		},
-		{
-			"name": "23ABC",
-			"slotsPerWeek": 4
+			"slotsPerWeek": 10
 		}
 	],
 	"batches": [
 		{
 			"name": "ELC-A",
-			"courses": [ "23MAT", "23MEE", "23CHY" ]
+			"courses": [ "23MAT" ]
 		},
 		{
 			"name": "ELC-B",
-			"courses": [ "23MAT", "23CHY", "23ABC" ]
-		},
-		{
-			"name": "ELC-C",
-			"courses": [ "23MAT", "23CHY" ]
-		},
-		{
-			"name": "ELC-D",
-			"courses": [ "23MAT", "23MEE", "23CHY", "23ABC" ]
+			"courses": [ "23MAT" ]
 		}
 	],
 	"faculties": [
 		{
 			"name": "Teacher1",
 			"course": "23MAT"
-		},
-		{
-			"name": "Teacher2",
-			"course": "23MEE"
-		},
-		{
-			"name": "Teacher3",
-			"course": "23CHY"
-		},
-		{
-			"name": "Teacher4",
-			"course": "23ABC"
 		}
 	]
 }
